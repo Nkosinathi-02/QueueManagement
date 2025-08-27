@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Queue Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7f9;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .admin-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .control-section, .queue-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .control-section h2, .queue-section h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .now-serving {
+            text-align: center;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .now-serving-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #e74c3c;
+            display: block;
+        }
+        
+        .now-serving-label {
+            font-size: 1rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        .call-next-btn {
+            background: #27ae60;
+            font-size: 1.2rem;
+            padding: 15px;
+        }
+        
+        .call-next-btn:hover {
+            background: #219653;
+        }
+        
+        .queue-list {
+            list-style: none;
+            margin-top: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .queue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: white;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .queue-number {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .queue-name {
+            color: #7f8c8d;
+        }
+        
+        .queue-service {
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+        
+        .empty-queue {
+            text-align: center;
+            padding: 1rem;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Queue Management Admin Panel</h1>
+        
+        <div class="admin-panel">
+            <div class="control-section">
+                <h2>Queue Control</h2>
+                
+                <div class="now-serving">
+                    <span class="now-serving-label">Now Serving</span>
+                    <span class="now-serving-number" id="nowServingAdmin">--</span>
+                </div>
+                
+                <button class="call-next-btn" onclick="callNext()">CALL NEXT TICKET</button>
+                <button onclick="resetQueue()">RESET QUEUE</button>
+            </div>
+            
+            <div class="queue-section">
+                <h2>Waiting Queue</h2>
+                <div id="waitingQueueAdmin" class="empty-queue">Loading queue...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize queue data
+        let queueSystem = {
+            currentNumber: 1000,
+            serving: null,
+            waiting: [],
+            served: []
+        };
+        
+        // Load queue data from localStorage
+        function loadQueueData() {
+            const savedData = localStorage.getItem('queueSystemData');
+            if (savedData) {
+                queueSystem = JSON.parse(savedData);
+            }
+            updateAdminDisplay();
+        }
+        
+        // Save queue data to localStorage
+        function saveQueueData() {
+            localStorage.setItem('queueSystemData', JSON.stringify(queueSystem));
+        }
+        
+        // Update admin display
+        function updateAdminDisplay() {
+            // Update "Now Serving"
+            const nowServingEl = document.getElementById('nowServingAdmin');
+            nowServingEl.textContent = queueSystem.serving ? `A${queueSystem.serving.number}` : '--';
+            
+            // Update waiting queue
+            const waitingQueueEl = document.getElementById('waitingQueueAdmin');
+            
+            if (queueSystem.waiting.length === 0) {
+                waitingQueueEl.innerHTML = '<div class="empty-queue">No one waiting in queue</div>';
+            } else {
+                waitingQueueEl.innerHTML = '';
+                queueSystem.waiting.forEach((ticket, index) => {
+                    const queueItem = document.createElement('div');
+                    queueItem.className = 'queue-item';
+                    queueItem.innerHTML = `
+                        <div>
+                            <div class="queue-number">A${ticket.number}</div>
+                            <div class="queue-name">${ticket.fullName}</div>
+                        </div>
+                        <div class="queue-service">${ticket.service}</div>
+                    `;
+                    waitingQueueEl.appendChild(queueItem);
+                });
+            }
+        }
+        
+        // Call next ticket
+        function callNext() {
+            if (queueSystem.waiting.length === 0) {
+                alert("The queue is empty! No one to call.");
+                return;
+            }
+            
+            // If someone is currently being served, move them to served list
+            if (queueSystem.serving) {
+                queueSystem.serving.status = 'served';
+                queueSystem.serving.serveTime = new Date();
+                queueSystem.served.push(queueSystem.serving);
+            }
+            
+            // Get the next person from the waiting queue
+            queueSystem.serving = queueSystem.waiting.shift();
+            queueSystem.serving.status = 'serving';
+            queueSystem.serving.serveTime = new Date();
+            
+            // Save changes and update display
+            saveQueueData();
+            updateAdminDisplay();
+            
+            alert(`Now serving: A${queueSystem.serving.number} - ${queueSystem.serving.fullName}`);
+        }
+        
+        // Reset the queue (for testing)
+        function resetQueue() {
+            if (confirm("Are you sure you want to reset the queue? This will clear all waiting tickets.")) {
+                queueSystem.waiting = [];
+                queueSystem.serving = null;
+                saveQueueData();
+                updateAdminDisplay();
+            }
+        }
+        
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQueueData();
+            
+            // Check for updates every 2 seconds
+            setInterval(loadQueueData, 2000);
+        });
+    </script>
+</body>
+</html>

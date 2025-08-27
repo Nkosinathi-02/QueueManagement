@@ -1,0 +1,139 @@
+/* Modern CSS Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 500px;
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+p {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #7f8c8d;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus, select:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+button {
+    width: 100%;
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+.hidden {
+    display: none;
+}
+
+.result-box {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #ecf0f1;
+    border-radius: 10px;
+    border-left: 5px solid #3498db;
+}
+
+.ticket-number {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+/* Display Screen Styles */
+#nowServing {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #e74c3c;
+    text-align: center;
+    margin: 1rem 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.queue-list {
+    list-style: none;
+    margin-top: 1.5rem;
+}
+
+.queue-list li {
+    background: #f8f9fa;
+    margin: 0.5rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+/* Admin Panel Styles */
+.call-next-btn {
+    background: #27ae60 !important;
+    font-size: 1.3rem !important;
+    padding: 20px !important;
+}
+
+.call-next-btn:hover {
+    background: #219653 !important;
+}

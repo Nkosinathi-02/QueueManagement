@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Service Queue System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: #3498db;
+        }
+
+        .logo h1 {
+            color: #2c3e50;
+            font-size: 1.8rem;
+        }
+
+        nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: #e74c3c;
+        }
+
+        .language-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .language-selector span {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        #language {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+
+        .panel-header {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3498db;
+        }
+
+        /* Kiosk Panel */
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .ticket-result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #ecf0f1;
+            border-radius: 10px;
+            border-left: 5px solid #3498db;
+        }
+
+        .ticket-number {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        /* Queue Status Panel */
+        .queue-status {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 2px solid #e74c3c;
+        }
+
+        .now-serving {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .now-serving-number {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #e74c3c;
+            display: block;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .now-serving-label {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .waiting-list {
+            margin-top: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .waiting-list h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .waiting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            border-left: 3px solid #3498db;
+        }
+
+        .waiting-number {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .waiting-position {
+            background: #3498db;
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-section {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .call-next-btn {
+            background: #27ae60;
+            font-size: 1.3rem;
+            padding: 15px;
+        }
+
+        .call-next-btn:hover {
+            background: #219653;
+        }
+
+        .queue-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            background: white;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Display Panel */
+        .display-panel {
+            display: none;
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .display-now-serving {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 1rem 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Status Messages */
+        .status-message {
+            text-align: center;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+            width: auto;
+            padding: 0;
+        }
+
+        .close-btn:hover {
+            color: #e74c3c;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Audio Controls */
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .audio-btn {
+            background: #9b59b6;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .audio-btn:hover {
+            background: #8e44ad;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            header {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .admin-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-translate="adminLogin">Admin Login</h2>
+                <button class="close-btn" onclick="closeLoginModal()">&times;</button>
+            </div>
+            <form id="adminLoginForm">
+                <div class="input-group">
+                    <label for="adminId" data-translate="adminId">Admin ID:</label>
+                    <input type="text" id="adminId" name="adminId" required data-translate-placeholder="enterAdminId">
+                </div>
+                <div class="input-group">
+                    <label for="adminPassword" data-translate="password">Password:</label>
+                    <input type="password" id="adminPassword" name="adminPassword" required data-translate-placeholder="enterPassword">
+                </div>
+                <button type="submit" class="btn-primary" data-translate="login">Login</button>
+            </form>
+            <div id="adminLoginMessage" class="status-message hidden"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-people-queue"></i>
+                <h1 data-translate="systemTitle">Public Service Queue System</h1>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-panel="kiosk" data-translate="kiosk">Kiosk</button>
+                <button class="nav-btn" data-panel="display" data-translate="display">Display</button>
+                <button class="nav-btn" data-panel="admin" id="adminNavButton" data-translate="admin">Admin</button>
+            </nav>
+            
+            <div class="language-selector">
+                <span data-translate="language">Language:</span>
+                <select id="language">
+                    <option value="en">English</option>
+                    <option value="zu">isiZulu</option>
+                    <option value="xh">isiXhosa</option>
+                    <option value="af">Afrikaans</option>
+                    <option value="st">Sesotho</option>
+                    <option value="tn">Setswana</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Kiosk Panel -->
+            <div class="panel" id="kiosk-panel">
+                <h2 class="panel-header" data-translate="getTicket">Get Your Ticket</h2>
+                
+                <form id="ticketForm">
+                    <div class="input-group">
+                        <label for="fullName" data-translate="fullName">Your Full Name:</label>
+                        <input type="text" id="fullName" name="fullName" required data-translate-placeholder="enterFullName">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="service" data-translate="chooseService">Choose a Service:</label>
+                        <select id="service" name="service" required>
+                            <option value="" data-translate="pleaseSelect">-- Please Select --</option>
+                            <option value="License Renewal" data-translate="licenseRenewal">License Renewal</option>
+                            <option value="Tax Submission" data-translate="taxSubmission">Tax Submission</option>
+                            <option value="ID Application" data-translate="idApplication">ID Application</option>
+                            <option value="General Inquiry" data-translate="generalInquiry">General Inquiry</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary" data-translate="getTicketBtn">Get My Ticket</button>
+                </form>
+
+                <div id="ticketResult" class="ticket-result hidden">
+                    <h2 data-translate="ticketReady">🎉 Your Ticket is Ready!</h2>
+                    <p class="ticket-number" data-translate="ticketNumber">Ticket Number: <span id="displayNumber">-</span></p>
+                    <p data-translate="welcome">Welcome, <span id="userName" class="user-name">-</span>!</p>
+                    <p data-translate="service">Service: <span id="userService">-</span></p>
+                    <p data-translate="estimatedWait">Your estimated wait time is approximately <span id="waitTime">~10</span> minutes.</p>
+                    <p data-translate="pleaseWait">Please have a seat and wait for your number to be called.</p>
+                </div>
+
+                <div id="statusMessage" class="status-message hidden"></div>
+            </div>
+
+            <!-- Queue Status Panel -->
+            <div class="panel queue-status">
+                <h2 class="panel-header" data-translate="liveQueue">Live Queue Status</h2>
+                
+                <div class="now-serving">
+                    <span class="now-serving-label" data-translate="nowServing">Now Serving</span>
+                    <span class="now-serving-number" id="nowServing">--</span>
+                </div>
+                
+                <div class="waiting-list">
+                    <h3 data-translate="waitingQueue">Waiting Queue</h3>
+                    <div id="waitingQueueList" class="empty-queue" data-translate="loadingQueue">Loading queue status...</div>
+                </div>
+                
+                <p class="last-updated" data-translate="lastUpdated">Last updated: <span id="updateTime">--:--</span></p>
+            </div>
+
+            <!-- Admin Panel -->
+            <div class="admin-panel" id="admin-panel">
+                <h2 class="panel-header" data-translate="adminPanel">Admin Panel</h2>
+                
+                <div class="admin-controls">
+                    <div class="control-section">
+                        <h3 data-translate="queueControl">Queue Control</h3>
+                        
+                        <div class="now-serving">
+                            <span class="now-serving-label" data-translate="nowServing">Now Serving</span>
+                            <span class="now-serving-number" id="nowServingAdmin">--</span>
+                        </div>
+                        
+                        <button class="btn-primary call-next-btn" onclick="callNext()" data-translate="callNext">CALL NEXT TICKET</button>
+                        <button class="btn-primary" onclick="resetQueue()" style="background: #e74c3c; margin-top: 10px;" data-translate="resetQueue">RESET QUEUE</button>
+                        <button class="btn-primary" onclick="logoutAdmin()" style="background: #95a5a6; margin-top: 10px;" data-translate="logout">LOGOUT</button>
+                        
+                        <div class="audio-controls">
+                            <button class="audio-btn" onclick="announceCurrentTicket()">
+                                <i class="fas fa-volume-up"></i> <span data-translate="announceTicket">Announce Current Ticket</span>
+                            </button>
+                            <button class="audio-btn" onclick="stopAnnouncement()" style="background: #e74c3c;">
+                                <i class="fas fa-stop"></i> <span data-translate="stopAnnouncement">Stop</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3 data-translate="waitingQueue">Waiting Queue</h3>
+                        <div id="waitingQueueAdmin" class="empty-queue" data-translate="loadingQueue">Loading queue...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Panel -->
+            <div class="display-panel" id="display-panel">
+                <h2 class="panel-header" data-translate="publicServices">Department of Public Services</h2>
+                
+                <div class="now-serving">
+                    <span class="now-serving-label" data-translate="nowServing">Now Serving</span>
+                    <div class="display-now-serving" id="displayNowServing">--</div>
+                </div>
+
+                <div class="waiting-list">
+                    <h3 data-translate="waitingQueue">Waiting Queue</h3>
+                    <div id="displayWaitingList" class="empty-queue" data-translate="loadingDisplay">Loading display...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                systemTitle: "Public Service Queue System",
+                language: "Language:",
+                kiosk: "Kiosk",
+                display: "Display",
+                admin: "Admin",
+                getTicket: "Get Your Ticket",
+                fullName: "Your Full Name:",
+                enterFullName: "e.g., John Doe",
+                chooseService: "Choose a Service:",
+                pleaseSelect: "-- Please Select --",
+                licenseRenewal: "License Renewal",
+                taxSubmission: "Tax Submission",
+                idApplication: "ID Application",
+                generalInquiry: "General Inquiry",
+                getTicketBtn: "Get My Ticket",
+                ticketReady: "🎉 Your Ticket is Ready!",
+                ticketNumber: "Ticket Number:",
+                welcome: "Welcome,",
+                service: "Service:",
+                estimatedWait: "Your estimated wait time is approximately",
+                pleaseWait: "Please have a seat and wait for your number to be called.",
+                liveQueue: "Live Queue Status",
+                nowServing: "Now Serving",
+                waitingQueue: "Waiting Queue",
+                loadingQueue: "Loading queue status...",
+                lastUpdated: "Last updated:",
+                adminPanel: "Admin Panel",
+                queueControl: "Queue Control",
+                callNext: "CALL NEXT TICKET",
+                resetQueue: "RESET QUEUE",
+                logout: "LOGOUT",
+                publicServices: "Department of Public Services",
+                loadingDisplay: "Loading display...",
+                adminLogin: "Admin Login",
+                adminId: "Admin ID:",
+                enterAdminId: "Enter Admin ID",
+                password: "Password:",
+                enterPassword: "Enter Password",
+                login: "Login",
+                loginSuccess: "Login successful! Redirecting to admin panel...",
+                loginError: "Invalid credentials. Please try again.",
+                queueEmptyAlert: "The queue is empty! No one to call.",
+                resetConfirm: "Are you sure you want to reset the queue? This will clear all waiting tickets.",
+                nowServingAlert: "Now serving:",
+                formError: "Please enter your name and select a service",
+                ticketCreated: "Ticket created successfully!",
+                ticketError: "Error creating your ticket. Please try again.",
+                noOneWaiting: "No one waiting in queue",
+                queueEmpty: "The queue is currently empty",
+                announceTicket: "Announce Current Ticket",
+                stopAnnouncement: "Stop"
+            },
+            zu: {
+                systemTitle: "Isistimu Yokulinda Yezinsizakalo Zomphakathi",
+                language: "Ulimi:",
+                kiosk: "I-Kiosk",
+                display: "Isibonisi",
+                admin: "Umlawuli",
+                getTicket: "Thola Itikethi Lakho",
+                fullName: "Igama Lakho Eliphelele:",
+                enterFullName: "isb., John Doe",
+                chooseService: "Khetha Insizakalo:",
+                pleaseSelect: "-- Sicela Ukhethe --",
+                licenseRenewal: "Ukuvuselelwa Kwelayisense",
+                taxSubmission: "Ukuhanjiswa Kwentela",
+                idApplication: "Isicelo Sedemvu",
+                generalInquiry: "Inqubho Ejwayelekile",
+                getTicketBtn: "Thola Itikethi Lami",
+                ticketReady: "🎉 Itikethi Lakho Silungile!",
+                ticketNumber: "Inombolo Yetikethi:",
+                welcome: "Siyakwamukela,",
+                service: "Insizakalo:",
+                estimatedWait: "Isikhathi sakho sokulinda cishe",
+                pleaseWait: "Sicela uhlale phansi bese ulinda ukuthi inombolo yakho ibizwe.",
+                liveQueue: "Isimo Samuhla Sokulinda",
+                nowServing: "Okwamanje Kukhonswa",
+                waitingQueue: "Chwane Lokulinda",
+                loadingQueue: "Ilayisha isimo sochwane...",
+                lastUpdated: "Okokugcina kubuyekeziwe:",
+                adminPanel: "Iphaneli Yomlawuli",
+                queueControl: "Ukulawula Uchwane",
+                callNext: "BIZA ITIKETHI ELILANDELAYO",
+                resetQueue: "SETHa KABUSHA UCHWANE",
+                logout: "Phuma",
+                publicServices: "UMnyango Wezinsizakalo Zomphakathi",
+                loadingDisplay: "Ilayisha isibonisi...",
+                adminLogin: "Ukungena Ngemvume Komlawuli",
+                adminId: "Isazisi Somlawuli:",
+                enterAdminId: "Faka Isazisi Somlawuli",
+                password: "Iphasiwedi:",
+                enterPassword: "Faka Iphasiwedi",
+                login: "Ngena ngemvume",
+                loginSuccess: "Ukungena ngemvume kuphumelele! Uqondiswa iphaneli yomlawuli...",
+                loginError: "Amaswidi angavumelekile. Sicela uzame futhi.",
+                queueEmptyAlert: "Uchwane awunalutho! Akekho okumele abizwe.",
+                resetConfirm: "Uqinisekile ukuthi ufuna usethe kabusha uchwane? Lokhu kuzosula zonke amathikethi alindile.",
+                nowServingAlert: "Okwamanje kukhonswa:",
+                formError: "Sicela ufake igama lakho bese ukhetha insizakalo",
+                ticketCreated: "Itikethi lenziwe ngempumelelo!",
+                ticketError: "Iphutha ekudaleni itikethi lakho. Sicela uzame futhi.",
+                noOneWaiting: "Akekho olindile ochwaneni",
+                queueEmpty: "Uchwane awunalutho okwamanje",
+                announceTicket: "Memezela Itikethi Lamanje",
+                stopAnnouncement: "Yeka"
+            },
+            xh: {
+                systemTitle: "Inkqubo yeQueue yeNkonzo yoLuntu",
+                language: "Ulwimi:",
+                kiosk: "I-Kiosk",
+                display: "Isibonisi",
+                admin: "Umlawuli",
+                getTicket: "Fumana Itikiti Yakho",
+                fullName: "Igama Lakho Elipheleleyo:",
+                enterFullName: "umz., John Doe",
+                chooseService: "Khetha Inkonzo:",
+                pleaseSelect: "-- Nceda Khetha --",
+                licenseRenewal: "Ukuvuselelwa kweLayisense",
+                taxSubmission: "Ukungeniswa kweRhafu",
+                idApplication: "Isicelo seID",
+                generalInquiry: "Imbuzo ejwayelekileyo",
+                getTicketBtn: "Fumana Itikiti Yam",
+                ticketReady: "🎉 Itikiti Yakho Ilungile!",
+                ticketNumber: "Inombolo Yetikiti:",
+                welcome: "Wamkelekile,",
+                service: "Inkonzo:",
+                estimatedWait: "Ixesha lakho lokulinda malunga nee",
+                pleaseWait: "Nceda uhlale phantsi kwaye ulinde ukuba inombolo yakho ibizwe.",
+                liveQueue: "Imo Yangoku yeQueue",
+                nowServing: "Okwangoku Kukhonzwa",
+                waitingQueue: "Uluhlu Lokulinda",
+                loadingQueue: "Ilayisha imo yequeue...",
+                lastUpdated: "Ihlazwe okokugqibela:",
+                adminPanel: "Iphaneli yoMlawuli",
+                queueControl: "Ulawulo lweQueue",
+                callNext: "BIZA ITIKITI ELILANDELAYO",
+                resetQueue: "SETA KWAKHONA IQUEUE",
+                logout: "Phuma",
+                publicServices: "ISebe leeNkonzo zoLuntu",
+                loadingDisplay: "Ilayisha isibonisi...",
+                adminLogin: "Ungeno lweNkosi",
+                adminId: "ID kaMlawuli:",
+                enterAdminId: "Faka ID kaMlawuli",
+                password: "Igama lokugqitha:",
+                enterPassword: "Faka Igama lokugqitha",
+                login: "Ngena",
+                loginSuccess: "Ungeno lweNkosi luphumelele! Uya kwiphaneli yomlawuli...",
+                loginError: "Amaswidi angavumelekanga. Nceda uzame kwakhona.",
+                queueEmptyAlert: "Iqueue ayinalutho! Akukho mntu onokubizwa.",
+                resetConfirm: "Uqinisekile ukufuna ukuseta kwakhona iqueue? Oku kuya kucima zonke iitikiti ezilindile.",
+                nowServingAlert: "Okwangoku kukhonzwa:",
+                formError: "Nceda ufake igama lakho kwaye ukhethe inkonzo",
+                ticketCreated: "Itikiti yenziwe ngempumelelo!",
+                ticketError: "Impazamo ekwenzeleni itikiti yakho. Nceda uzame kwakhona.",
+                noOneWaiting: "Akukho mntu olindileyo kwiqueue",
+                queueEmpty: "Iqueue ayinalutho okwangoku",
+                announceTicket: "Xela Itikiti yangoku",
+                stopAnnouncement: "Yeka"
+            },
+            af: {
+                systemTitle: "Openbare Diens Toustelsel",
+                language: "Taal:",
+                kiosk: "Kiosk",
+                display: "Vertoning",
+                admin: "Admin",
+                getTicket: "Kry Jou Kaartjie",
+                fullName: "Jou Volle Naam:",
+                enterFullName: "bv., John Doe",
+                chooseService: "Kies 'n Diens:",
+                pleaseSelect: "-- Kies Asseblief --",
+                licenseRenewal: "Lisensie Hernuwing",
+                taxSubmission: "Belasting Indiening",
+                idApplication: "ID Aansoek",
+                generalInquiry: "Algemene Navraag",
+                getTicketBtn: "Kry My Kaartjie",
+                ticketReady: "🎉 Jou Kaartjie is Reg!",
+                ticketNumber: "Kaartjie Nommer:",
+                welcome: "Welkom,",
+                service: "Diens:",
+                estimatedWait: "Jou geskatte wagtyd is ongeveer",
+                pleaseWait: "Neem asseblief sitplek en wag vir jou nommer om genoem te word.",
+                liveQueue: "Regstreekse Toustatus",
+                nowServing: "Tans Besig",
+                waitingQueue: "Wagry",
+                loadingQueue: "Laai toustatus...",
+                lastUpdated: "Laas opgedateer:",
+                adminPanel: "Admin Paneel",
+                queueControl: "Toubeheer",
+                callNext: "ROEP VOLGENDE KAARTJIE",
+                resetQueue: "HERSTEL TOU",
+                logout: "Teken Uit",
+                publicServices: "Departement van Openbare Dienste",
+                loadingDisplay: "Laai vertoning...",
+                adminLogin: "Admin Aanmelding",
+                adminId: "Admin ID:",
+                enterAdminId: "Voer Admin ID in",
+                password: "Wagwoord:",
+                enterPassword: "Voer Wagwoord in",
+                login: "Teken Aan",
+                loginSuccess: "Aanmelding suksesvol! Stuur na admin paneel...",
+                loginError: "Ongeldige geloofsbriewe. Probeer asseblief weer.",
+                queueEmptyAlert: "Die tou is leeg! Niemand om te roep nie.",
+                resetConfirm: "Is jy seker jy wil die tou herstel? Dit sal alle wagkaartjies skoonmaak.",
+                nowServingAlert: "Tans besig:",
+                formError: "Voer asseblief jou naam in en kies 'n diens",
+                ticketCreated: "Kaartjie suksesvol geskep!",
+                ticketError: "Fout met die skep van jou kaartjie. Probeer asseblief weer.",
+                noOneWaiting: "Niemand wag in die tou nie",
+                queueEmpty: "Die tou is tans leeg",
+                announceTicket: "Kondig Huidige Kaartjie aan",
+                stopAnnouncement: "Stop"
+            },
+            st: {
+                systemTitle: "Tsamaiso ya Kheisi ya Lits'ebeletso tsa Setjhaba",
+                language: "Puo:",
+                kiosk: "Kiosk",
+                display: "Ponahalo",
+                admin: "Molaoli",
+                getTicket: "Fumana Tikete ea Hao",
+                fullName: "Lebitso la Hao le Feletseng:",
+                enterFullName: "mohl., John Doe",
+                chooseService: "Khetha Tshebeletso:",
+                pleaseSelect: "-- Ka kopo Khetha --",
+                licenseRenewal: "Ngoliso ya Layisense",
+                taxSubmission: "Ho Romella Muso",
+                idApplication: "Kopo ea ID",
+                generalInquiry: "Dipotsiso tsa Kakaretso",
+                getTicketBtn: "Fumana Tikete ea Ka",
+                ticketReady: "🎉 Tikete ea Hao e Lokile!",
+                ticketNumber: "Nomoro ea Tikete:",
+                welcome: "Rea u amohela,",
+                service: "Tshebeletso:",
+                estimatedWait: "Nako ea hau ea ho emela e ka ba",
+                pleaseWait: "Ka kopo dula fatshe o emela hore nomoro ea hau e bitsoe.",
+                liveQueue: "Boemo ba Hajoale ba Kheisi",
+                nowServing: "Ho Sebeletsa Hajoale",
+                waitingQueue: "Kheisi ea Ho Ema",
+                loadingQueue: "Ho laisha boemo ba kheisi...",
+                lastUpdated: "Ho nchafatswa ha ho qetela:",
+                adminPanel: "Lebota la Molaoli",
+                queueControl: "Taolo ea Kheisi",
+                callNext: "BITSA TIKETE E LATelang",
+                resetQueue: "SETHA KHEISI HAPE",
+                logout: "Tsoa",
+                publicServices: "Lefapha la Lits'ebeletso tsa Setjhaba",
+                loadingDisplay: "Ho laisha ponahalo...",
+                adminLogin: "Ho Kena ha Molaoli",
+                adminId: "ID ea Molaoli:",
+                enterAdminId: "Kenya ID ea Molaoli",
+                password: "Password:",
+                enterPassword: "Kenya Password",
+                login: "Kena",
+                loginSuccess: "Ho kena ha molemo! Ho qhoma ho panel ya molaoli...",
+                loginError: "Dikreiti tse fosahetseng. Ka kopo leka hape.",
+                queueEmptyAlert: "Kheisi e haello! Ha ho motho ea ka bitswang.",
+                resetConfirm: "Na u na le bonnete ba hore u batla ho seta kheisi hape? Sena se tla hlakola litikete tsohle tse emeng.",
+                nowServingAlert: "Hajoale ho sebeletsa:",
+                formError: "Ka kopo kenya lebitso la hau 'me u khethe ts'ebeletso",
+                ticketCreated: "Tikete e entsoe ka katleho!",
+                ticketError: "Phoso ho etseng tikete ea hau. Ka kopo leka hape.",
+                noOneWaiting: "Ha ho motho ea emeng khesing",
+                queueEmpty: "Kheisi ha haello hajoale",
+                announceTicket: "Phatlalatsa Tikete ea Hajoale",
+                stopAnnouncement: "Ema"
+            },
+            tn: {
+                systemTitle: "Tsamaiso ya Kheisi ya Ditirelo tsa Setšhaba",
+                language: "Polelo:",
+                kiosk: "Kiosk",
+                display: "Ponatsho",
+                admin: "Molaodi",
+                getTicket: "Iponele Tikiti ya gago",
+                fullName: "Leina la gago la Botlalo:",
+                enterFullName: "sek., John Doe",
+                chooseService: "Kgetha Tirelo:",
+                pleaseSelect: "-- Tsweetswee Kgetha --",
+                licenseRenewal: "Ngoliso ya Layesense",
+                taxSubmission: "Go romela Motlolo",
+                idApplication: "Kopo ya ID",
+                generalInquiry: "Dipotsiso tsa Kakaretso",
+                getTicketBtn: "Iponele Tikiti ya me",
+                ticketReady: "🎉 Tikiti ya gago e siame!",
+                ticketNumber: "Nomoro ya Tikiti:",
+                welcome: "O amogetswe,",
+                service: "Tirelo:",
+                estimatedWait: "Nako ya gago ya go emela e ka nna",
+                pleaseWait: "Tsweetswee dula fase o emele gore nomoro ya gago e bitswe.",
+                liveQueue: "Maemo a Gona Jaanong a Kheisi",
+                nowServing: "Go Direla Gona Jaanong",
+                waitingQueue: "Kheisi ya Go Emelela",
+                loadingQueue: "Go layisha maemo a kheisi...",
+                lastUpdated: "Go ntshafaditswe bofelo:",
+                adminPanel: "Lepanela la Molaodi",
+                queueControl: "Taolo ya Kheisi",
+                callNext: "BITSANG TIKITI E E LATELANG",
+                resetQueue: "SETHA KHEISI GAPE",
+                logout: "Tswa",
+                publicServices: "Lefapha la Ditirelo tsa Setšhaba",
+                loadingDisplay: "Go layisha ponatsho...",
+                adminLogin: "Go Tsena ga Molaodi",
+                adminId: "ID ya Molaodi:",
+                enterAdminId: "Kenya ID ya Molaodi",
+                password: "Password:",
+                enterPassword: "Kenya Password",
+                login: "Tsena",
+                loginSuccess: "Go tsena ga molemo! Go lebiswa go lepanela la molaodi...",
+                loginError: "Dikreiti tse di siameng. Tsweetswee leka gape.",
+                queueEmptyAlert: "Kheisi e a napa! Ga go ope yo o ka bitsiwang.",
+                resetConfirm: "A o na le bonnete ba gore o batla go seta kheisi gape? Seno se tla hlakola ditikiti tsotlhe tse di emelelang.",
+                nowServingAlert: "Gona jaanong go direla:",
+                formError: "Tsweetswee tsaya leina la gago mme o kgethê tirelo",
+                ticketCreated: "Tikiti e dirilwe ka katlego!",
+                ticketError: "Phoso go direng tikiti ya gago. Tsweetswee leka gape.",
+                noOneWaiting: "Ga go ope yo o emelelang mo khesing",
+                queueEmpty: "Kheisi e a napa gona jaanong",
+                announceTicket: "Peleta Tikiti ya Gona Jaanong",
+                stopAnnouncement: "Ema"
+            }
+        };
+
+        // Initialize queue data structure
+        let queueSystem = {
+            currentNumber: 1000,
+            serving: null,
+            waiting: [],
+            served: []
+        };
+
+        // Admin authentication state
+        let isAdminAuthenticated = false;
+        let currentLanguage = 'en';
+        let announcementInterval = null;
+
+        // Function to change language
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Update placeholders
+            document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                if (translations[lang][key]) {
+                    element.setAttribute('placeholder', translations[lang][key]);
+                }
+            });
+            
+            // Update options in service dropdown
+            const serviceSelect = document.getElementById('service');
+            if (serviceSelect) {
+                for (let i = 0; i < serviceSelect.options.length; i++) {
+                    const option = serviceSelect.options[i];
+                    if (option.hasAttribute('data-translate')) {
+                        const key = option.getAttribute('data-translate');
+                        if (translations[lang][key]) {
+                            option.textContent = translations[lang][key];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Text-to-Speech function
+        function speakText(text, lang) {
+            // Stop any ongoing speech
+            window.speechSynthesis.cancel();
+            
+            const speech = new SpeechSynthesisUtterance(text);
+            
+            // Set language based on selection
+            switch(lang) {
+                case 'zu':
+                    speech.lang = 'zu-ZA';
+                    break;
+                case 'xh':
+                    speech.lang = 'xh-ZA';
+                    break;
+                case 'af':
+                    speech.lang = 'af-ZA';
+                    break;
+                case 'st':
+                    speech.lang = 'st-ZA';
+                    break;
+                case 'tn':
+                    speech.lang = 'tn-ZA';
+                    break;
+                default:
+                    speech.lang = 'en-US';
+            }
+            
+            speech.volume = 1;
+            speech.rate = 0.9;
+            speech.pitch = 1;
+            
+            window.speechSynthesis.speak(speech);
+        }
+
+        // Announce current ticket
+        function announceCurrentTicket() {
+            if (!queueSystem.serving) {
+                alert(translations[currentLanguage].queueEmptyAlert);
+                return;
+            }
+            
+            // Stop any ongoing announcements
+            stopAnnouncement();
+            
+            const ticketNumber = queueSystem.serving.number;
+            const customerName = queueSystem.serving.fullName;
+            
+            // Create announcement text based on language
+            let announcementText = "";
+            
+            switch(currentLanguage) {
+                case 'zu':
+                    announcementText = `Ikhandlela elilandelayo, A${ticketNumber}, u${customerName}, sicela uye ekaunti yesikhathi samanje`;
+                    break;
+                case 'xh':
+                    announcementText = `Ithikiti elilandelayo, A${ticketNumber}, u${customerName}, nceda uye kwi-akhawunti yangoku`;
+                    break;
+                case 'af':
+                    announcementText = `Volgende kaartjie, A${ticketNumber}, ${customerName}, gaan asseblief na die huidige teller`;
+                    break;
+                case 'st':
+                    announcementText = `Tikete e latelang, A${ticketNumber}, ${customerName}, ke kopo e ee ho akhaonto ea hajoale`;
+                    break;
+                case 'tn':
+                    announcementText = `Tikiti e e latelang, A${ticketNumber}, ${customerName}, tsweetswee e ya go akhaonto ya gona jaanong`;
+                    break;
+                default:
+                    announcementText = `Next ticket, A${ticketNumber}, ${customerName}, please proceed to the current counter`;
+            }
+            
+            // Announce 3 times with delays
+            let count = 0;
+            
+            function announce() {
+                if (count < 1) {
+                    speakText(announcementText, currentLanguage);
+                    count++;
+                    announcementInterval = setTimeout(announce, 5000); // 5 seconds between announcements
+                }
+            }
+            
+            // Start the first announcement
+            announce();
+        }
+
+        // Stop announcement
+        function stopAnnouncement() {
+            if (announcementInterval) {
+                clearTimeout(announcementInterval);
+                announcementInterval = null;
+            }
+            window.speechSynthesis.cancel();
+        }
+
+        // Navigation functionality
+        document.querySelectorAll('.nav-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const panelId = this.getAttribute('data-panel') + '-panel';
+                
+                // Check if trying to access admin panel without authentication
+                if (panelId === 'admin-panel' && !isAdminAuthenticated) {
+                    openLoginModal();
+                    return;
+                }
+                
+                // Update active button
+                document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show selected panel
+                document.getElementById('kiosk-panel').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'none';
+                document.getElementById('display-panel').style.display = 'none';
+                
+                document.getElementById(panelId).style.display = 'block';
+                
+                // If it's the admin panel, update its display
+                if (panelId === 'admin-panel') {
+                    updateAdminDisplay();
+                }
+                
+                // If it's the display panel, update its display
+                if (panelId === 'display-panel') {
+                    updateDisplayPanel();
+                }
+                
+                // If it's the kiosk panel, make sure it's shown alongside queue status
+                if (panelId === 'kiosk-panel') {
+                    document.getElementById('kiosk-panel').style.display = 'block';
+                    document.querySelector('.queue-status').style.display = 'block';
+                } else {
+                    document.querySelector('.queue-status').style.display = 'none';
+                }
+            });
+        });
+
+        // Language selector event listener
+        document.getElementById('language').addEventListener('change', function() {
+            changeLanguage(this.value);
+        });
+
+        // Admin login modal functions
+        function openLoginModal() {
+            document.getElementById('adminLoginModal').style.display = 'flex';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('adminLoginModal').style.display = 'none';
+            document.getElementById('adminLoginForm').reset();
+            document.getElementById('adminLoginMessage').classList.add('hidden');
+        }
+
+        function showAdminStatus(message, isSuccess = true) {
+            const statusEl = document.getElementById('adminLoginMessage');
+            statusEl.textContent = message;
+            statusEl.className = isSuccess ? 'status-message status-success' : 'status-message status-error';
+            statusEl.classList.remove('hidden');
+            
+            // Hide after 3 seconds if it's a success message
+            if (isSuccess) {
+                setTimeout(() => {
+                    statusEl.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        // Admin login form submission
+        document.getElementById('adminLoginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const adminId = document.getElementById('adminId').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            if (adminId === 'AdminID' && password === 'Admin123') {
+                isAdminAuthenticated = true;
+                showAdminStatus(translations[currentLanguage].loginSuccess, true);
+                
+                setTimeout(() => {
+                    closeLoginModal();
+                    // Switch to admin panel
+                    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                    document.getElementById('adminNavButton').classList.add('active');
+                    
+                    document.getElementById('kiosk-panel').style.display = 'none';
+                    document.getElementById('display-panel').style.display = 'none';
+                    document.querySelector('.queue-status').style.display = 'none';
+                    document.getElementById('admin-panel').style.display = 'block';
+                    
+                    updateAdminDisplay();
+                }, 1500);
+            } else {
+                showAdminStatus(translations[currentLanguage].loginError, false);
+            }
+        });
+
+        // Admin logout function
+        function logoutAdmin() {
+            isAdminAuthenticated = false;
+            // Switch to kiosk view
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('[data-panel="kiosk"]').classList.add('active');
+            
+            document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('kiosk-panel').style.display = 'block';
+            document.querySelector('.queue-status').style.display = 'block';
+        }
+
+        // Show status message
+        function showStatus(message, isSuccess = true) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = isSuccess ? 'status-message status-success' : 'status-message status-error';
+            statusEl.classList.remove('hidden');
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                statusEl.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Load initial data from localStorage
+        function loadQueueData() {
+            try {
+                const savedData = localStorage.getItem('queueSystemData');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    
+                    // Validate the data structure
+                    if (parsedData && typeof parsedData === 'object') {
+                        queueSystem = {
+                            currentNumber: parsedData.currentNumber || 1000,
+                            serving: parsedData.serving || null,
+                            waiting: Array.isArray(parsedData.waiting) ? parsedData.waiting : [],
+                            served: Array.isArray(parsedData.served) ? parsedData.served : []
+                        };
+                    }
+                }
+                updateQueueDisplay();
+            } catch (error) {
+                console.error('Error loading queue data:', error);
+                showStatus('Error loading queue data. Please refresh the page.', false);
+            }
+        }
+
+        // Save queue data to localStorage
+        function saveQueueData() {
+            try {
+                localStorage.setItem('queueSystemData', JSON.stringify(queueSystem));
+                return true;
+            } catch (error) {
+                console.error('Error saving queue data:', error);
+                showStatus('Error saving your ticket. Please try again.', false);
+                return false;
+            }
+        }
+
+        // Update the queue display
+        function updateQueueDisplay() {
+            try {
+                // Update "Now Serving"
+                const nowServingEl = document.getElementById('nowServing');
+                nowServingEl.textContent = queueSystem.serving ? `A${queueSystem.serving.number}` : '--';
+                
+                // Update waiting list
+                const waitingListEl = document.getElementById('waitingQueueList');
+                
+                if (queueSystem.waiting.length === 0) {
+                    waitingListEl.innerHTML = '<div class="empty-queue">' + translations[currentLanguage].noOneWaiting + '</div>';
+                } else {
+                    waitingListEl.innerHTML = '';
+                    queueSystem.waiting.forEach((ticket, index) => {
+                        const waitingItem = document.createElement('div');
+                        waitingItem.className = 'waiting-item';
+                        waitingItem.innerHTML = `
+                            <span class="waiting-number">A${ticket.number} - ${ticket.fullName}</span>
+                            <span class="waiting-position">#${index + 1}</span>
+                        `;
+                        waitingListEl.appendChild(waitingItem);
+                    });
+                }
+                
+                // Update timestamp
+                document.getElementById('updateTime').textContent = new Date().toLocaleTimeString();
+            } catch (error) {
+                console.error('Error updating display:', error);
+            }
+        }
+
+        // Update admin display
+        function updateAdminDisplay() {
+            try {
+                // Update "Now Serving"
+                const nowServingEl = document.getElementById('nowServingAdmin');
+                nowServingEl.textContent = queueSystem.serving ? `A${queueSystem.serving.number}` : '--';
+                
+                // Update waiting queue
+                const waitingQueueEl = document.getElementById('waitingQueueAdmin');
+                
+                if (queueSystem.waiting.length === 0) {
+                    waitingQueueEl.innerHTML = '<div class="empty-queue">' + translations[currentLanguage].noOneWaiting + '</div>';
+                } else {
+                    waitingQueueEl.innerHTML = '';
+                    queueSystem.waiting.forEach((ticket, index) => {
+                        const queueItem = document.createElement('div');
+                        queueItem.className = 'queue-item';
+                        queueItem.innerHTML = `
+                            <div>
+                                <div class="waiting-number">A${ticket.number}</div>
+                                <div>${ticket.fullName}</div>
+                            </div>
+                            <div>${ticket.service}</div>
+                        `;
+                        waitingQueueEl.appendChild(queueItem);
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating admin display:', error);
+            }
+        }
+
+        // Update display panel
+        function updateDisplayPanel() {
+            try {
+                // Update "Now Serving"
+                const nowServingEl = document.getElementById('displayNowServing');
+                nowServingEl.textContent = queueSystem.serving ? `A${queueSystem.serving.number}` : '--';
+                
+                // Update waiting list
+                const waitingListEl = document.getElementById('displayWaitingList');
+                
+                if (queueSystem.waiting.length === 0) {
+                    waitingListEl.innerHTML = '<div class="empty-queue">' + translations[currentLanguage].queueEmpty + '</div>';
+                } else {
+                    waitingListEl.innerHTML = '';
+                    queueSystem.waiting.forEach((ticket, index) => {
+                        const waitingItem = document.createElement('div');
+                        waitingItem.className = 'waiting-item';
+                        waitingItem.innerHTML = `
+                            <span class="waiting-number">A${ticket.number} - ${ticket.fullName}</span>
+                            <span class="waiting-position">#${index + 1}</span>
+                        `;
+                        waitingListEl.appendChild(waitingItem);
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating display panel:', error);
+            }
+        }
+
+        // Generate a new ticket
+        function generateTicket(fullName, serviceType) {
+            try {
+                // Load the latest data first to avoid conflicts
+                loadQueueData();
+                
+                queueSystem.currentNumber++;
+                
+                const newTicket = {
+                    id: Date.now(),
+                    number: queueSystem.currentNumber,
+                    fullName: fullName,
+                    service: serviceType,
+                    status: 'waiting',
+                    joinTime: new Date()
+                };
+                
+                // Add to waiting queue
+                queueSystem.waiting.push(newTicket);
+                
+                // Save to storage
+                if (saveQueueData()) {
+                    showStatus(translations[currentLanguage].ticketCreated, true);
+                    return newTicket;
+                } else {
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error generating ticket:', error);
+                showStatus(translations[currentLanguage].ticketError, false);
+                return null;
+            }
+        }
+
+        // Call next ticket
+        function callNext() {
+            if (queueSystem.waiting.length === 0) {
+                alert(translations[currentLanguage].queueEmptyAlert);
+                return;
+            }
+            
+            // If someone is currently being served, move them to served list
+            if (queueSystem.serving) {
+                queueSystem.serving.status = 'served';
+                queueSystem.serving.serveTime = new Date();
+                queueSystem.served.push(queueSystem.serving);
+            }
+            
+            // Get the next person from the waiting queue
+            queueSystem.serving = queueSystem.waiting.shift();
+            queueSystem.serving.status = 'serving';
+            queueSystem.serving.serveTime = new Date();
+            
+            // Save changes and update displays
+            saveQueueData();
+            updateQueueDisplay();
+            updateAdminDisplay();
+            updateDisplayPanel();
+            
+            // Automatically announce the new ticket
+            setTimeout(announceCurrentTicket, 1000);
+            
+            alert(translations[currentLanguage].nowServingAlert + ` A${queueSystem.serving.number} - ${queueSystem.serving.fullName}`);
+        }
+
+        // Reset the queue
+        function resetQueue() {
+            if (confirm(translations[currentLanguage].resetConfirm)) {
+                queueSystem.waiting = [];
+                queueSystem.serving = null;
+                saveQueueData();
+                updateQueueDisplay();
+                updateAdminDisplay();
+                updateDisplayPanel();
+            }
+        }
+
+        // Check for queue updates
+        function checkForUpdates() {
+            try {
+                const savedData = localStorage.getItem('queueSystemData');
+                if (savedData) {
+                    const newData = JSON.parse(savedData);
+                    
+                    // Check if data has changed
+                    if (JSON.stringify(newData) !== JSON.stringify(queueSystem)) {
+                        queueSystem = newData;
+                        updateQueueDisplay();
+                        updateAdminDisplay();
+                        updateDisplayPanel();
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking for updates:', error);
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize queue data
+            loadQueueData();
+            
+            // Set up language selector
+            const languageSelect = document.getElementById('language');
+            languageSelect.value = currentLanguage;
+            languageSelect.addEventListener('change', function() {
+                changeLanguage(this.value);
+            });
+            
+            // Check for updates every 2 seconds
+            setInterval(checkForUpdates, 2000);
+            
+            const form = document.getElementById('ticketForm');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    
+                    const fullName = document.getElementById('fullName').value.trim();
+                    const service = document.getElementById('service').value;
+                    
+                    if (!fullName || !service) {
+                        showStatus(translations[currentLanguage].formError, false);
+                        return;
+                    }
+                    
+                    // Generate ticket
+                    const newTicket = generateTicket(fullName, service);
+                    
+                    if (newTicket) {
+                        // Calculate estimated wait time (5 minutes per person ahead in queue)
+                        const waitTime = queueSystem.waiting.length * 5;
+                        
+                        // Show ticket to user
+                        document.getElementById('displayNumber').textContent = `A${newTicket.number}`;
+                        document.getElementById('userName').textContent = fullName;
+                        document.getElementById('userService').textContent = service;
+                        document.getElementById('waitTime').textContent = waitTime;
+                        
+                        // Show result
+                        document.getElementById('ticketResult').classList.remove('hidden');
+                        
+                        // Update queue display
+                        updateQueueDisplay();
+                        
+                        // Reset form
+                        form.reset();
+                    }
+                });
+            }
+            
+            // Set up the initial view
+            document.querySelector('.queue-status').style.display = 'block';
+            
+            // Close modal if clicked outside
+            window.addEventListener('click', function(event) {
+                if (event.target === document.getElementById('adminLoginModal')) {
+                    closeLoginModal();
+                }
+            });
+        });
+
+        // Add event listener for storage events (updates from other tabs)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'queueSystemData') {
+                loadQueueData();
+            }
+        });
+    </script>
+</body>
+</html>

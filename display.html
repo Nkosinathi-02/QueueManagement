@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Queue Display</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Now Serving</h1>
+            <div id="nowServing">A---</div>
+        </header>
+
+        <div class="queue-section">
+            <h2>Waiting Queue</h2>
+            <ul id="waitingList" class="queue-list">
+                <li>No one waiting currently</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function updateDisplay() {
+            const data = JSON.parse(localStorage.getItem('queueData') || '{"tickets":[]}');
+            
+            // Find who is currently being served
+            const serving = data.tickets.find(t => t.status === 'serving');
+            document.getElementById('nowServing').textContent = serving ? `A${serving.number}` : 'A---';
+            
+            // Get waiting list (all waiting tickets)
+            const waiting = data.tickets.filter(t => t.status === 'waiting');
+            const list = document.getElementById('waitingList');
+            
+            if (waiting.length === 0) {
+                list.innerHTML = '<li>No one waiting currently</li>';
+            } else {
+                list.innerHTML = '';
+                waiting.forEach(ticket => {
+                    const li = document.createElement('li');
+                    li.textContent = `A${ticket.number} - ${ticket.fullName} (${ticket.service})`;
+                    list.appendChild(li);
+                });
+            }
+        }
+
+        // Update display every 3 seconds
+        setInterval(updateDisplay, 3000);
+        updateDisplay(); // Initial update
+    </script>
+</body>
+</html>
